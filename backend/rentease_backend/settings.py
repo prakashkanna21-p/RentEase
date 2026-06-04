@@ -1,7 +1,9 @@
 """
 Django settings for rentease_backend project.
+Generated for PythonAnywhere deployment.
 """
 
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -9,12 +11,19 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-your-secret-key-here-change-this'
+# For PythonAnywhere, use environment variable or a fixed key
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-4^x-f@i(fx2k(mk6z&c%_x$8t7s9=!@#q&*$%^ELEVATE2026')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+# IMPORTANT: Add your PythonAnywhere domain here
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'pprakash52020.pythonanywhere.com',
+    '.pythonanywhere.com',
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -40,8 +49,9 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = 'accounts.User'
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # This MUST be first
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # For static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -70,7 +80,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'rentease_backend.wsgi.application'
 
-# Database
+# Database - SQLite for PythonAnywhere (simpler)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -96,23 +106,29 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'  # India time zone
 USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
-MEDIA_URL = 'media/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Media files (User uploaded images)
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS settings
+# CORS settings - Allow React frontend (local and deployed)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://rentease.vercel.app",
+    "https://pprakash52020.pythonanywhere.com",
 ]
+
 CORS_ALLOW_CREDENTIALS = True
 
 # REST Framework settings
@@ -131,11 +147,38 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
-# Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
 
-# Default primary key field type
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# Security settings for production
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+
+# Session settings
+SESSION_COOKIE_SECURE = False  # Set to True if using HTTPS
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+# CSRF settings
+CSRF_COOKIE_SECURE = False  # Set to True if using HTTPS
+CSRF_COOKIE_HTTPONLY = False
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',
+    'https://pprakash52020.pythonanywhere.com',
+]
+
+# Logging for debugging on PythonAnywhere
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
