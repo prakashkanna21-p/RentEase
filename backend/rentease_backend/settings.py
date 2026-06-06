@@ -64,14 +64,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'rentease_backend.wsgi.application'
 
-# Database - SQLite for local, PostgreSQL for Render
+# Database - Use SQLite for SnapDeploy (no external database needed)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 database_url = os.environ.get('DATABASE_URL')
 if database_url:
     DATABASES['default'] = dj_database_url.config(default=database_url)
