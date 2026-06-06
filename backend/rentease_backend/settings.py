@@ -1,6 +1,6 @@
 """
 Django settings for rentease_backend project.
-Configured for SnapDeploy with SQLite (no external database needed)
+Pure SQLite configuration - NO PostgreSQL
 """
 
 import os
@@ -11,19 +11,13 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# For SnapDeploy, use environment variable or a fixed key
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-rentease-snapdeploy-key-2026')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-rentease-secret-key-2026')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# Allow SnapDeploy domains and localhost
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '.snapdeploy.app',  # Allows any snapdeploy.app subdomain
-    'rentease-backend.snapdeploy.app',
-]
+# Allow all hosts during deployment (restrict in production)
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 INSTALLED_APPS = [
@@ -51,7 +45,6 @@ AUTH_USER_MODEL = 'accounts.User'
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # For static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -80,8 +73,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'rentease_backend.wsgi.application'
 
-# Database - SQLite for SnapDeploy (no external PostgreSQL needed)
-# This works perfectly within the container
+# DATABASE - PURE SQLITE, NO POSTGRESQL
+# This is the ONLY database configuration
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -107,16 +100,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'Asia/Kolkata'  # India time zone
+TIME_ZONE = 'Asia/Kolkata'
 USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = '/static/'
+STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
 
 # Media files (User uploaded images)
 MEDIA_URL = '/media/'
@@ -125,7 +115,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS settings - Allow React frontend (Netlify and local)
+# CORS settings - Allow React frontend
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
@@ -154,26 +144,18 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-# Security settings for production
+# Security settings
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 
-# Session settings
-SESSION_COOKIE_SECURE = False  # Set to True if using HTTPS
-SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = 'Lax'
-
 # CSRF settings
-CSRF_COOKIE_SECURE = False  # Set to True if using HTTPS
-CSRF_COOKIE_HTTPONLY = False
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
-    'https://rentease-backend.snapdeploy.app',
-    'https://*.snapdeploy.app',
+    'https://rentease.netlify.app',
 ]
 
-# Logging (optional, for debugging on SnapDeploy)
+# Logging (optional)
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
