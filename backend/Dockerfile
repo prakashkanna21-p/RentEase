@@ -1,4 +1,4 @@
-# Use Python 3.12 official image
+# Use Python 3.12 slim image
 FROM python:3.12-slim
 
 # Set working directory
@@ -9,18 +9,22 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV DEBUG=False
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+# Install system dependencies (NO PostgreSQL libraries needed)
+RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
-    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
+# Copy requirements first for better caching
 COPY requirements.txt .
+
+# Install Python dependencies (NO PostgreSQL packages)
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application
+# Copy the entire application
 COPY . .
+
+# Create media directory
+RUN mkdir -p /app/media
 
 # Collect static files
 RUN python manage.py collectstatic --noinput
