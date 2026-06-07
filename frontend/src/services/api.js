@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-// Use Render backend URL in production
+// Use different URLs for development and production
 const API_URL = process.env.NODE_ENV === 'production'
-  ? 'https://rentease-backend.onrender.com/api'
+  ? 'https://your-backend-url.pythonanywhere.com/api'  // Change this to your live backend URL
   : 'http://localhost:8000/api';
 
 const api = axios.create({

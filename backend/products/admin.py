@@ -11,4 +11,3 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ['name', 'category', 'monthly_rent', 'security_deposit', 'is_available']
     list_filter = ['category', 'is_available']
     search_fields = ['name', 'description']
-    list_editable = ['monthly_rent', 'security_deposit', 'is_available']

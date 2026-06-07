@@ -1,9 +1,10 @@
 """
 Django settings for rentease_backend project.
-Pure SQLite configuration - NO PostgreSQL
+Configured for Railway.app deployment with PostgreSQL
 """
 
 import os
+import dj_database_url
 from pathlib import Path
 from datetime import timedelta
 
@@ -11,12 +12,11 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-rentease-secret-key-2026')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-rentease-railway-key-2026')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# Allow all hosts during deployment (restrict in production)
 ALLOWED_HOSTS = ['*']
 
 # Application definition
@@ -27,16 +27,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
-    # Third party apps
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
-    
-    # Our apps
-    'accounts',
-    'products',
-    'rentals',
+    'accounts',    # ✅ Must be here
+    'products',    # ✅ Must be here
+    'rentals',     # ✅ Must be here
 ]
 
 # Custom user model
@@ -45,6 +41,7 @@ AUTH_USER_MODEL = 'accounts.User'
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # For static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -73,14 +70,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'rentease_backend.wsgi.application'
 
-# DATABASE - PURE SQLITE, NO POSTGRESQL
-# This is the ONLY database configuration
+# Database - Supports both SQLite (local) and PostgreSQL (Railway)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# Use DATABASE_URL if provided (Railway sets this automatically)
+database_url = os.environ.get('DATABASE_URL')
+if database_url:
+    DATABASES['default'] = dj_database_url.config(default=database_url)
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -105,12 +106,13 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files (User uploaded images)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -121,6 +123,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "https://rentease.netlify.app",
     "https://*.netlify.app",
+    "https://*.railway.app",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -144,7 +147,7 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-# Security settings
+# Security settings for production
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
@@ -153,9 +156,10 @@ X_FRAME_OPTIONS = 'DENY'
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
     'https://rentease.netlify.app',
+    'https://*.railway.app',
 ]
 
-# Logging (optional)
+# Logging for debugging on Railway
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

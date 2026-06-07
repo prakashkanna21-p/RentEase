@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Order, OrderItem, MaintenanceRequest
+from .models import Order, OrderItem
 
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,25 +28,6 @@ class CreateOrderSerializer(serializers.Serializer):
     delivery_date = serializers.DateField()
     delivery_note = serializers.CharField(required=False, allow_blank=True)
     cart_items = serializers.ListField(child=serializers.DictField())
-    total_rent = serializers.FloatField()
-    total_deposit = serializers.FloatField()
-    grand_total = serializers.FloatField()
-
-class MaintenanceRequestSerializer(serializers.ModelSerializer):
-    user_name = serializers.ReadOnlyField(source='user.username')
-    order_number = serializers.ReadOnlyField(source='order.order_number')
-    
-    class Meta:
-        model = MaintenanceRequest
-        fields = ['id', 'user', 'user_name', 'order', 'order_number', 'product_name',
-                  'issue_type', 'description', 'priority', 'status', 'images',
-                  'admin_notes', 'created_at', 'updated_at', 'resolved_at']
-        read_only_fields = ['user', 'status', 'admin_notes', 'resolved_at']
-
-class CreateMaintenanceRequestSerializer(serializers.Serializer):
-    order_id = serializers.IntegerField()
-    product_name = serializers.CharField(max_length=200)
-    issue_type = serializers.CharField(max_length=100)
-    description = serializers.CharField()
-    priority = serializers.CharField(max_length=10)
-    images = serializers.CharField(required=False, allow_blank=True)
+    total_rent = serializers.DecimalField(max_digits=10, decimal_places=2)
+    total_deposit = serializers.DecimalField(max_digits=10, decimal_places=2)
+    grand_total = serializers.DecimalField(max_digits=10, decimal_places=2)
